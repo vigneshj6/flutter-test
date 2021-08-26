@@ -1,3 +1,4 @@
+import '../add_payment/add_payment_widget.dart';
 import '../auth/auth_util.dart';
 import '../flutter_flow/flutter_flow_theme.dart';
 import '../flutter_flow/flutter_flow_util.dart';
@@ -21,8 +22,13 @@ class _DashboardWidgetState extends State<DashboardWidget> {
       key: scaffoldKey,
       backgroundColor: Color(0xFFDBE2E7),
       floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          print('FloatingActionButton pressed ...');
+        onPressed: () async {
+          await Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => AddPaymentWidget(),
+            ),
+          );
         },
         backgroundColor: Color(0xFF4B39EF),
         elevation: 8,
