@@ -1,8 +1,11 @@
 import '../add_payment/add_payment_widget.dart';
 import '../auth/auth_util.dart';
+import '../backend/backend.dart';
 import '../flutter_flow/flutter_flow_theme.dart';
 import '../flutter_flow/flutter_flow_util.dart';
+import '../flutter_flow/flutter_flow_widgets.dart';
 import '../login/login_widget.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
@@ -14,6 +17,7 @@ class DashboardWidget extends StatefulWidget {
 }
 
 class _DashboardWidgetState extends State<DashboardWidget> {
+  WalletRecord wallet_object;
   final scaffoldKey = GlobalKey<ScaffoldState>();
 
   @override
@@ -132,80 +136,6 @@ class _DashboardWidgetState extends State<DashboardWidget> {
                       children: [
                         Expanded(
                           child: Padding(
-                            padding: EdgeInsets.fromLTRB(4, 4, 0, 4),
-                            child: Card(
-                              clipBehavior: Clip.antiAliasWithSaveLayer,
-                              color: Color(0xFFF5F5F5),
-                              elevation: 2,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(8),
-                              ),
-                              child: Column(
-                                mainAxisSize: MainAxisSize.max,
-                                children: [
-                                  Padding(
-                                    padding: EdgeInsets.fromLTRB(8, 8, 8, 8),
-                                    child: Row(
-                                      mainAxisSize: MainAxisSize.max,
-                                      children: [
-                                        Expanded(
-                                          child: Text(
-                                            'Outgoing',
-                                            style: FlutterFlowTheme.bodyText2
-                                                .override(
-                                              fontFamily: 'Lexend Deca',
-                                              color: Color(0xFF8B97A2),
-                                              fontSize: 14,
-                                              fontWeight: FontWeight.w500,
-                                            ),
-                                          ),
-                                        ),
-                                        Card(
-                                          clipBehavior:
-                                              Clip.antiAliasWithSaveLayer,
-                                          color: Color(0x734B39EF),
-                                          child: Padding(
-                                            padding:
-                                                EdgeInsets.fromLTRB(2, 2, 2, 2),
-                                            child: Text(
-                                              '^ 25%',
-                                              style: TextStyle(
-                                                color: Color(0xFF4B39EF),
-                                                fontWeight: FontWeight.w500,
-                                                fontSize: 10,
-                                              ),
-                                            ),
-                                          ),
-                                        )
-                                      ],
-                                    ),
-                                  ),
-                                  Row(
-                                    mainAxisSize: MainAxisSize.max,
-                                    children: [
-                                      Padding(
-                                        padding:
-                                            EdgeInsets.fromLTRB(8, 0, 0, 8),
-                                        child: Text(
-                                          '\$3,205.02',
-                                          style:
-                                              FlutterFlowTheme.title2.override(
-                                            fontFamily: 'Lexend Deca',
-                                            color: Color(0xFF4B39EF),
-                                            fontSize: 22,
-                                            fontWeight: FontWeight.w500,
-                                          ),
-                                        ),
-                                      )
-                                    ],
-                                  )
-                                ],
-                              ),
-                            ),
-                          ),
-                        ),
-                        Expanded(
-                          child: Padding(
                             padding: EdgeInsets.fromLTRB(2, 4, 4, 4),
                             child: Card(
                               clipBehavior: Clip.antiAliasWithSaveLayer,
@@ -224,30 +154,13 @@ class _DashboardWidgetState extends State<DashboardWidget> {
                                       children: [
                                         Expanded(
                                           child: Text(
-                                            'Incoming',
+                                            'Wallet balance',
                                             style: FlutterFlowTheme.bodyText2
                                                 .override(
                                               fontFamily: 'Lexend Deca',
                                               color: Color(0xFF8B97A2),
                                               fontSize: 14,
                                               fontWeight: FontWeight.w500,
-                                            ),
-                                          ),
-                                        ),
-                                        Card(
-                                          clipBehavior:
-                                              Clip.antiAliasWithSaveLayer,
-                                          color: Color(0x4D3BC821),
-                                          child: Padding(
-                                            padding:
-                                                EdgeInsets.fromLTRB(2, 2, 2, 2),
-                                            child: Text(
-                                              '^ 25%',
-                                              style: TextStyle(
-                                                color: Color(0xFF3BC821),
-                                                fontWeight: FontWeight.w500,
-                                                fontSize: 10,
-                                              ),
                                             ),
                                           ),
                                         )
@@ -260,15 +173,55 @@ class _DashboardWidgetState extends State<DashboardWidget> {
                                       Padding(
                                         padding:
                                             EdgeInsets.fromLTRB(8, 0, 0, 8),
-                                        child: Text(
-                                          '\$3,205.02',
-                                          style:
-                                              FlutterFlowTheme.title2.override(
-                                            fontFamily: 'Lexend Deca',
-                                            color: Color(0xFF3BC821),
-                                            fontSize: 22,
-                                            fontWeight: FontWeight.w500,
+                                        child:
+                                            StreamBuilder<List<WalletRecord>>(
+                                          stream: queryWalletRecord(
+                                            queryBuilder: (walletRecord) =>
+                                                walletRecord.where('user',
+                                                    isEqualTo:
+                                                        currentUserReference),
+                                            singleRecord: true,
                                           ),
+                                          builder: (context, snapshot) {
+                                            // Customize what your widget looks like when it's loading.
+                                            if (!snapshot.hasData) {
+                                              return Center(
+                                                child: SizedBox(
+                                                  width: 50,
+                                                  height: 50,
+                                                  child:
+                                                      CircularProgressIndicator(
+                                                    color: FlutterFlowTheme
+                                                        .primaryColor,
+                                                  ),
+                                                ),
+                                              );
+                                            }
+                                            List<WalletRecord>
+                                                textWalletRecordList =
+                                                snapshot.data;
+                                            // Customize what your widget looks like with no query results.
+                                            if (snapshot.data.isEmpty) {
+                                              return Container(
+                                                height: 100,
+                                                child: Center(
+                                                  child: Text('No results.'),
+                                                ),
+                                              );
+                                            }
+                                            final textWalletRecord =
+                                                textWalletRecordList.first;
+                                            return Text(
+                                              '',
+                                              style: FlutterFlowTheme.title2
+                                                  .override(
+                                                fontFamily: 'Lexend Deca',
+                                                color: Color(0xFF3BC821),
+                                                fontSize: 22,
+                                                fontWeight: FontWeight.w500,
+                                              ),
+                                            );
+                                          },
                                         ),
                                       )
                                     ],
@@ -713,6 +666,37 @@ class _DashboardWidgetState extends State<DashboardWidget> {
                         ),
                       )
                     ],
+                  ),
+                  FFButtonWidget(
+                    onPressed: () async {
+                      final walletCreateData = createWalletRecordData(
+                        user: currentUserReference,
+                        amount: 0.0,
+                        updatedTime: getCurrentTimestamp,
+                      );
+                      final walletRecordReference =
+                          WalletRecord.collection.doc();
+                      await walletRecordReference.set(walletCreateData);
+                      wallet_object = WalletRecord.getDocumentFromData(
+                          walletCreateData, walletRecordReference);
+
+                      setState(() {});
+                    },
+                    text: 'Button',
+                    options: FFButtonOptions(
+                      width: 130,
+                      height: 40,
+                      color: FlutterFlowTheme.primaryColor,
+                      textStyle: FlutterFlowTheme.subtitle2.override(
+                        fontFamily: 'Poppins',
+                        color: Colors.white,
+                      ),
+                      borderSide: BorderSide(
+                        color: Colors.transparent,
+                        width: 1,
+                      ),
+                      borderRadius: 12,
+                    ),
                   )
                 ],
               ),
